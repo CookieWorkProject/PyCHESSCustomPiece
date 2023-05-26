@@ -20,7 +20,6 @@ flag = True
 
 square_group = pg.sprite.Group()
 
-
 for row in range(8):
     for column in range(8):
         if (row + column) % 2 == 0:
@@ -38,8 +37,14 @@ white_location = set()
 Selected= ()
 Player_click = []
 
+pawn_promotion = False
+
 global gs
 gs = Gs()
+
+former_piece = None
+former_index = None
+rectangle = Rectangle(0,0)
 
 for i, row in enumerate(gs.board):
     for x,col in enumerate(row):
@@ -73,6 +78,10 @@ def draw_pieces(screen,gs):
 
 
 def move_piece(Player_click, gs):
+    global pawn_promotion
+    global rectangle
+    global former_piece
+    global former_index 
     piece_selected, desired_move = Player_click
     if desired_move in white_location:
         white_location.remove(desired_move)
@@ -80,6 +89,16 @@ def move_piece(Player_click, gs):
         black_location.remove(desired_move)
 
     if desired_move in gs.board[piece_selected[0]][piece_selected[1]].get_valid_moves(piece_selected, gs, turn):
+        if isinstance(gs.board[piece_selected[0]][piece_selected[1]], King):
+            if gs.board[piece_selected[0]][piece_selected[1]].color == "white":
+                gs.whiteKing = desired_move
+            else:
+                gs.blackKing = desired_move
+        if isinstance(gs.board[piece_selected[0]][piece_selected[1]], Pawn) and (desired_move[0] == 7 or desired_move[0] == 0):
+            pawn_promotion = True
+            former_piece = gs.board[piece_selected[0]][piece_selected[1]]
+            former_index = desired_move
+            rectangle = Rectangle(desired_move[1],desired_move[0])
         tmp = gs.board[piece_selected[0]][piece_selected[1]]
         gs.board[piece_selected[0]][piece_selected[1]] = "--"
         captured = gs.board[desired_move[0]][desired_move[1]]
@@ -89,9 +108,9 @@ def move_piece(Player_click, gs):
 
         if captured != "--":
             if captured.color == "white":
-                gs.white_pieces.remove((captured))
+                gs.white_pieces.remove(captured)
             elif captured.color == "black":
-                gs.black_pieces.remove((captured))
+                gs.black_pieces.remove(captured)
         return True
     return False
 
@@ -156,7 +175,7 @@ while flag:
                                 square.image.fill('red')
                     elif turn == "black":
                           for square in square_group.sprites():
-                            if square.rect.y // 64 == gs.whiteKing[0] and square.rect.x // 64 == gs.whiteKing[1]:
+                            if square.rect.y // 64 == gs.blackKing[0] and square.rect.x // 64 == gs.blackKing[1]:
                                 square.image.fill('red')
                 else:
                     for square in square_group.sprites():
@@ -169,6 +188,26 @@ while flag:
         
     square_group.draw(screen)
     draw_pieces(screen,gs)
+
+    if pawn_promotion:
+        pg.draw.rect(screen, "#ffffff", rectangle)
+        rectangle.display_images(screen)
+        initial = former_piece
+        turn = former_piece.color
+        former_piece = rectangle.assign_piece(former_piece)
+
+        if initial != former_piece:
+            if former_piece.color == "white":
+                gs.white_pieces.remove(gs.board[former_index[0]][former_index[1]])
+                gs.white_pieces.append(former_piece)
+                turn = "black"
+            elif former_piece.color == "black":
+                gs.black_pieces.remove(gs.board[former_index[0]][former_index[1]])
+                gs.black_pieces.append(former_piece)
+                turn = "white"
+            gs.board[former_index[0]][former_index[1]] = former_piece
+            pawn_promotion = False
+    
 
     circle_group.update()
     circle_group.draw(screen)

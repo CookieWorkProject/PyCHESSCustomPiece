@@ -57,6 +57,7 @@ class Game_State:
             for pieces in self.white_pieces:
                 if self.blackKing in pieces.get_moves(self.get_pos(pieces), self.board):
                     return True
+        return False
 
     def squareUnderAttack(self, start, turn):
         valid_moves = []
@@ -268,7 +269,6 @@ class Pawn(Piece):
         moves = []
         x, y = pos
 
-        # determine direction based on color
         if self.color == "white":
             direction = -1
             start_row = 6
@@ -276,20 +276,19 @@ class Pawn(Piece):
             direction = 1
             start_row = 1
 
-        # check one square forward
-        if board[x+direction][y] == "--":
+        if 0 <= x+direction <= 7 and board[x+direction][y] == "--":
             moves.append((x+direction, y))
-            # check two squares forward if pawn is on starting row
             if x == start_row and board[x+2*direction][y] == "--":
                 moves.append((x+2*direction, y))
-
-        # check diagonal capture moves
-        if y > 0 and board[x+direction][y-1] != '--' and board[x+direction][y-1].color != self.color:
-            moves.append((x+direction, y-1))
-        if y < 7 and board[x+direction][y+1] != '--' and board[x+direction][y+1].color != self.color:
-            moves.append((x+direction, y+1))
+                
+        if 0 <= x+direction <= 7:
+            if 0 < y <= 7 and board[x+direction][y-1] != '--' and board[x+direction][y-1].color != self.color:
+                moves.append((x+direction, y-1))
+            if 0 <= y < 7 and board[x+direction][y+1] != '--' and board[x+direction][y+1].color != self.color:
+                moves.append((x+direction, y+1))
 
         return moves
+
 
 class Squares(pg.sprite.Sprite):
     def __init__(self, x, y, fill):
@@ -299,3 +298,54 @@ class Squares(pg.sprite.Sprite):
         self.rect = self.image.get_rect()
         self.rect.topleft = [x, y]
         self.original = fill
+
+class Rectangle(pg.sprite.Sprite):
+    def __init__(self, x, y):
+        super().__init__()
+        self.width = 64
+        self.height = 256
+        self.x = x
+        self.y = y
+        if y == 0:
+            self.rect = pg.Rect(x * 64, y * 64, self.width, self.height)
+        elif y == 7:
+            self.rect = pg.Rect(x * 64, 512 - (4 * 64), self.width, self.height)
+
+        if y == 0:
+            self.promotion_pieces = {
+                'Queen': Queen("wQ.png", "white"),
+                'Knight': Knight("wN.png", "white"),
+                'Rook': Castle("wR.png", "white"),
+                'Bishop': Bishop("wB.png", "white")
+            }
+        elif y == 7:
+            self.promotion_pieces = {
+                'Queen': Queen("bQ.png", "black"),
+                'Knight': Knight("bN.png", "blqck"),
+                'Rook': Castle("bR.png", "black"),
+                'Bishop': Bishop("bB.png", "black")
+            }
+
+    def display_images(self, screen):
+        for i, (piece_name, piece) in enumerate(self.promotion_pieces.items()):
+            image =  piece.image
+            image_rect = image.get_rect()
+            if self.y == 0:
+                image_rect.center = ((self.x * 64) + 32, (i * 64) + 32)
+            elif self.y == 7:
+                image_rect.center = ((self.x * 64) + 32, 512 - ((i * 64) + 32))
+            screen.blit(image, image_rect)
+    
+    def assign_piece(self, former_piece):
+        for event in pg.event.get():
+            if event.type == pg.MOUSEBUTTONDOWN:
+                x_pos, y_pos = pg.mouse.get_pos()
+            
+                if self.y == 0:
+                    click = (x_pos // 64, y_pos // 64)
+                if self.y == 7:
+                    click = (x_pos // 64, (512 - y_pos) // 64)
+
+                if click[0] == self.x:
+                    former_piece = self.promotion_pieces[list(self.promotion_pieces.keys())[click[1]]]
+        return former_piece
