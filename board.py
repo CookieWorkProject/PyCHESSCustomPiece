@@ -288,6 +288,7 @@ while flag:
 
     if gs.if_Check(turn):
         if turn == "white":
+            gs.board[gs.whiteKing[0]][gs.whiteKing[1]].check = True
             for square in square_group.sprites():
                 if (
                     square.rect.y // 64 == gs.whiteKing[0]
@@ -295,6 +296,7 @@ while flag:
                 ):
                     square.image.fill("red")
         elif turn == "black":
+            gs.board[gs.whiteKing[0]][gs.whiteKing[1]].check = True
             for square in square_group.sprites():
                 if (
                     square.rect.y // 64 == gs.blackKing[0]

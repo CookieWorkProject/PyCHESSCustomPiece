@@ -179,10 +179,7 @@ class Piece:
         return []
 
     def get_valid_moves(self, pos, gs, turn):
-        if self.color == "white":
-            return gs.squareUnderAttack(pos, turn)
-        elif self.color == "black":
-            return gs.squareUnderAttack(pos, turn)
+        return gs.squareUnderAttack(pos, turn)
 
 
 class King(Piece):
@@ -190,6 +187,7 @@ class King(Piece):
         Piece.__init__(self, image, color)
         self.start_pos = (7, 4) if self.color == "white" else (0, 4)
         self.castling = True
+        self.check = False
 
     def get_moves(self, pos, board):
         x, y = pos
@@ -214,22 +212,33 @@ class King(Piece):
                     moves.append((x_temp, y_temp))
 
         # Castling
-        if self.castling:
-            if isinstance(board[x][y + 3], Castle):
-                if board[x][y + 3].castling:
-                    if board[x][y + 1] == "--" and board[x][y + 2] == "--":
-                        moves.append((x, y + 2))
+        if not self.check:
+            if self.castling:
+                if isinstance(board[x][y + 3], Castle):
+                    if board[x][y + 3].castling:
+                        if board[x][y + 1] == "--" and board[x][y + 2] == "--":
+                            moves.append((x, y + 2))
 
-            if isinstance(board[x][y - 4], Castle):
-                if board[x][y - 4].castling:
-                    if (
-                        board[x][y - 1] == "--"
-                        and board[x][y - 2] == "--"
-                        and board[x][y - 3] == "--"
-                    ):
-                        moves.append((x, y - 2))
+                if isinstance(board[x][y - 4], Castle):
+                    if board[x][y - 4].castling:
+                        if (
+                            board[x][y - 1] == "--"
+                            and board[x][y - 2] == "--"
+                            and board[x][y - 3] == "--"
+                        ):
+                            moves.append((x, y - 2))
 
         return moves
+
+    def get_valid_moves(self, pos, gs, turn):
+        filtered_move = []
+        valid_moves = sorted(gs.squareUnderAttack(pos, turn))
+        for i in range(len(valid_moves)):
+            if abs(valid_moves[i][1] - self.start_pos[1]) == 2 and self.castling:
+                if (valid_moves[i][0], valid_moves[i][1] + 1) not in valid_moves:
+                    filtered_move.append(valid_moves[i])
+        valid_moves = [move for move in valid_moves if move not in filtered_move]
+        return valid_moves
 
 
 class Queen(Piece):
