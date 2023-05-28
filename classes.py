@@ -75,6 +75,11 @@ class Game_State:
 
         self.board_state = None
 
+        for i, row in enumerate(self.board):
+            for j, col in enumerate(row):
+                if isinstance(col, Castle):
+                    col.start_pos = (i, j)
+
     def get_pos(self, chesspiece):
         """
         Input type: Piece Object
@@ -183,6 +188,8 @@ class Piece:
 class King(Piece):
     def __init__(self, image, color):
         Piece.__init__(self, image, color)
+        self.start_pos = (7, 4) if self.color == "white" else (0, 4)
+        self.castling = True
 
     def get_moves(self, pos, board):
         x, y = pos
@@ -205,6 +212,22 @@ class King(Piece):
                     moves.append((x_temp, y_temp))
                 elif board[x_temp][y_temp].color != self.color:
                     moves.append((x_temp, y_temp))
+
+        # Castling
+        if self.castling:
+            if isinstance(board[x][y + 3], Castle):
+                if board[x][y + 3].castling:
+                    if board[x][y + 1] == "--" and board[x][y + 2] == "--":
+                        moves.append((x, y + 2))
+
+            if isinstance(board[x][y - 4], Castle):
+                if board[x][y - 4].castling:
+                    if (
+                        board[x][y - 1] == "--"
+                        and board[x][y - 2] == "--"
+                        and board[x][y - 3] == "--"
+                    ):
+                        moves.append((x, y - 2))
 
         return moves
 
@@ -246,6 +269,8 @@ class Queen(Piece):
 class Castle(Piece):
     def __init__(self, image, color):
         Piece.__init__(self, image, color)
+        self.start_pos = None
+        self.castling = True
 
     def get_moves(self, pos, board):
         x, y = pos

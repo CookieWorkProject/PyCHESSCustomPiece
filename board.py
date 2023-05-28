@@ -61,6 +61,7 @@ turn = "white"
 
 move_sound = pg.mixer.Sound("move-self.mp3")
 capture_sound = pg.mixer.Sound("capture.mp3")
+castle_sound = pg.mixer.Sound("castle.mp3")
 
 
 def draw_pieces(screen, gs):
@@ -86,6 +87,7 @@ def move_piece(Player_click, gs):
     global en_passant_piece
 
     capture_a_piece = False
+    castle = False
     piece_selected, desired_move = Player_click
 
     if en_passant_piece:
@@ -101,11 +103,28 @@ def move_piece(Player_click, gs):
     if desired_move in gs.board[piece_selected[0]][piece_selected[1]].get_valid_moves(
         piece_selected, gs, turn
     ):
+        if isinstance(gs.board[piece_selected[0]][piece_selected[1]], Castle):
+            gs.board[piece_selected[0]][piece_selected[1]].castling = False
+
         if isinstance(gs.board[piece_selected[0]][piece_selected[1]], King):
             if gs.board[piece_selected[0]][piece_selected[1]].color == "white":
                 gs.whiteKing = desired_move
             else:
                 gs.blackKing = desired_move
+            gs.board[piece_selected[0]][piece_selected[1]].castling = False
+
+            if abs(desired_move[1] - piece_selected[1]) == 2:
+                if isinstance(gs.board[desired_move[0]][desired_move[1] + 1], Castle):
+                    tmp = gs.board[desired_move[0]][desired_move[1] + 1]
+                    gs.board[desired_move[0]][desired_move[1] + 1] = "--"
+                    gs.board[desired_move[0]][desired_move[1] - 1] = tmp
+
+                elif isinstance(gs.board[desired_move[0]][desired_move[1] - 2], Castle):
+                    tmp = gs.board[desired_move[0]][desired_move[1] - 2]
+                    gs.board[desired_move[0]][desired_move[1] - 2] = "--"
+                    gs.board[desired_move[0]][desired_move[1] + 1] = tmp
+
+                castle = True
 
         if isinstance(gs.board[piece_selected[0]][piece_selected[1]], Pawn):
             gs.board[piece_selected[0]][piece_selected[1]].current_row = desired_move[0]
@@ -171,6 +190,8 @@ def move_piece(Player_click, gs):
 
         if capture_a_piece:
             capture_sound.play()
+        elif castle:
+            castle_sound.play()
         else:
             move_sound.play()
         circle_group.empty()
