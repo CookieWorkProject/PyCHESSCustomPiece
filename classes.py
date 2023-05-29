@@ -170,6 +170,32 @@ class Game_State:
                 self.black_pieces.append(captured_piece)
 
 
+    def check_mate(self, turn):
+        if self.if_Check(turn):
+            if turn == "white":
+                for pieces in self.white_pieces:
+                    if pieces.get_valid_moves(self.get_pos(pieces), self, turn):
+                        return False
+            elif turn == "black":
+                for pieces in self.black_pieces:
+                    if pieces.get_valid_moves(self.get_pos(pieces), self, turn):
+                        return False
+            return True
+        return False
+    
+
+    def stale_mate(self,turn):
+        if turn == "white":
+            for pieces in self.white_pieces:
+                if pieces.get_valid_moves(self.get_pos(pieces), self, turn):
+                    return False
+        elif turn == "black":
+            for pieces in self.black_pieces:
+                if pieces.get_valid_moves(self.get_pos(pieces), self, turn):
+                    return False
+        return True
+
+
 class Piece:
     def __init__(self, image, color):
         self.image = pg.image.load(image)
@@ -231,13 +257,19 @@ class King(Piece):
         return moves
 
     def get_valid_moves(self, pos, gs, turn):
-        filtered_move = []
         valid_moves = sorted(gs.squareUnderAttack(pos, turn))
-        for i in range(len(valid_moves)):
-            if abs(valid_moves[i][1] - self.start_pos[1]) == 2 and self.castling:
-                if (valid_moves[i][0], valid_moves[i][1] + 1) not in valid_moves:
-                    filtered_move.append(valid_moves[i])
-        valid_moves = [move for move in valid_moves if move not in filtered_move]
+        l, r = 0, len(valid_moves)
+        while l < r:
+            if valid_moves[l][1] - self.start_pos[1] == 2 and self.castling:
+                if (valid_moves[l][0], valid_moves[l][1] - 1) not in valid_moves:
+                    valid_moves.remove(valid_moves[l])
+                    r -= 1
+            elif valid_moves[l][1] - self.start_pos[1] == -2 and self.castling:
+                if (valid_moves[l][0], valid_moves[l][1] + 1) not in valid_moves:
+                    valid_moves.remove(valid_moves[l])
+                    r -= 1
+            l += 1
+
         return valid_moves
 
 

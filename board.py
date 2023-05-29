@@ -16,6 +16,9 @@ circle_group = pg.sprite.Group()
 clock = pg.time.Clock()
 
 flag = True
+active = False
+check_mate = False
+stale_mate = False
 
 square_group = pg.sprite.Group()
 
@@ -118,13 +121,24 @@ def move_piece(Player_click, gs):
                     tmp = gs.board[desired_move[0]][desired_move[1] + 1]
                     gs.board[desired_move[0]][desired_move[1] + 1] = "--"
                     gs.board[desired_move[0]][desired_move[1] - 1] = tmp
+                    prev_pos = (desired_move[0], desired_move[1] + 1)
+                    new_pos = (desired_move[0], desired_move[1] - 1)
 
                 elif isinstance(gs.board[desired_move[0]][desired_move[1] - 2], Castle):
                     tmp = gs.board[desired_move[0]][desired_move[1] - 2]
                     gs.board[desired_move[0]][desired_move[1] - 2] = "--"
                     gs.board[desired_move[0]][desired_move[1] + 1] = tmp
+                    prev_pos = (desired_move[0], desired_move[1] + 1)
+                    new_pos = (desired_move[0], desired_move[1] - 1)
 
                 castle = True
+
+                if prev_pos in white_location:
+                    white_location.remove(prev_pos)
+                    white_location.add(new_pos)
+                elif prev_pos in black_location:
+                    black_location.remove(prev_pos)
+                    white_location.add(new_pos)
 
         if isinstance(gs.board[piece_selected[0]][piece_selected[1]], Pawn):
             gs.board[piece_selected[0]][piece_selected[1]].current_row = desired_move[0]
@@ -168,10 +182,12 @@ def move_piece(Player_click, gs):
                         gs.white_pieces.remove(
                             gs.board[desired_move[0] + dir][desired_move[1]]
                         )
+                        white_location.remove((desired_move[0] + dir, desired_move[1]))
                     else:
                         gs.black_pieces.remove(
                             gs.board[desired_move[0] + dir][desired_move[1]]
                         )
+                        black_location.remove((desired_move[0] + dir, desired_move[1]))
                     gs.board[desired_move[0] + dir][desired_move[1]] = "--"
                     capture_a_piece = True
                     en_passant_piece = None
@@ -203,6 +219,14 @@ while flag:
     for event in pg.event.get():
         if event.type == pg.QUIT:
             flag = False
+
+        if event.type == pg.KEYDOWN:
+            if event.key == pg.K_SPACE:
+                if not active:
+                    active = True
+                stale_mate = False
+                check_mate = False
+
         if event.type == pg.MOUSEBUTTONDOWN:
             y_pos, x_pos = pg.mouse.get_pos()
 
@@ -260,55 +284,81 @@ while flag:
                         black_location.add(Player_click[1])
                         turn = "white"
 
-                draw_pieces(screen, gs)
                 Selected = ()
                 Player_click = []
+    if active:
+        square_group.draw(screen)
+        draw_pieces(screen, gs)
 
-    square_group.draw(screen)
-    draw_pieces(screen, gs)
+        if pawn_promotion:
+            pg.draw.rect(screen, "#ffffff", rectangle)
+            rectangle.display_images(screen)
+            initial = former_piece
+            turn = former_piece.color
+            former_piece = rectangle.assign_piece(former_piece)
 
-    if pawn_promotion:
-        pg.draw.rect(screen, "#ffffff", rectangle)
-        rectangle.display_images(screen)
-        initial = former_piece
-        turn = former_piece.color
-        former_piece = rectangle.assign_piece(former_piece)
+            if initial != former_piece:
+                if former_piece.color == "white":
+                    gs.white_pieces.remove(gs.board[former_index[0]][former_index[1]])
+                    gs.white_pieces.append(former_piece)
+                    turn = "black"
+                elif former_piece.color == "black":
+                    gs.black_pieces.remove(gs.board[former_index[0]][former_index[1]])
+                    gs.black_pieces.append(former_piece)
+                    turn = "white"
+                gs.board[former_index[0]][former_index[1]] = former_piece
+                pawn_promotion = False
 
-        if initial != former_piece:
-            if former_piece.color == "white":
-                gs.white_pieces.remove(gs.board[former_index[0]][former_index[1]])
-                gs.white_pieces.append(former_piece)
-                turn = "black"
-            elif former_piece.color == "black":
-                gs.black_pieces.remove(gs.board[former_index[0]][former_index[1]])
-                gs.black_pieces.append(former_piece)
-                turn = "white"
-            gs.board[former_index[0]][former_index[1]] = former_piece
-            pawn_promotion = False
-
-    if gs.if_Check(turn):
-        if turn == "white":
-            gs.board[gs.whiteKing[0]][gs.whiteKing[1]].check = True
+        if gs.if_Check(turn):
+            if turn == "white":
+                gs.board[gs.whiteKing[0]][gs.whiteKing[1]].check = True
+                for square in square_group.sprites():
+                    if (
+                        square.rect.y // 64 == gs.whiteKing[0]
+                        and square.rect.x // 64 == gs.whiteKing[1]
+                    ):
+                        square.image.fill("red")
+            elif turn == "black":
+                gs.board[gs.whiteKing[0]][gs.whiteKing[1]].check = True
+                for square in square_group.sprites():
+                    if (
+                        square.rect.y // 64 == gs.blackKing[0]
+                        and square.rect.x // 64 == gs.blackKing[1]
+                    ):
+                        square.image.fill("red")
+        else:
             for square in square_group.sprites():
-                if (
-                    square.rect.y // 64 == gs.whiteKing[0]
-                    and square.rect.x // 64 == gs.whiteKing[1]
-                ):
-                    square.image.fill("red")
-        elif turn == "black":
-            gs.board[gs.whiteKing[0]][gs.whiteKing[1]].check = True
-            for square in square_group.sprites():
-                if (
-                    square.rect.y // 64 == gs.blackKing[0]
-                    and square.rect.x // 64 == gs.blackKing[1]
-                ):
-                    square.image.fill("red")
+                square.image.fill(square.original)
+
+        if gs.check_mate(turn):
+            check_mate = True
+            active = False
+
+        elif gs.stale_mate(turn):
+            stale_mate = True
+            active =  False
+
+
+        circle_group.update()
+        circle_group.draw(screen)
+
     else:
-        for square in square_group.sprites():
-            square.image.fill(square.original)
+        font = pg.font.SysFont("Helvetica", 25)
+        if check_mate:
+            text1 = font.render(f"{turn} lose", True, "red")
+            text1_rect = text1.get_rect(center=(256, 256))
 
-    circle_group.update()
-    circle_group.draw(screen)
+        elif stale_mate:
+            text1 = font.render(f"Stalemate", True, "red")
+            text1_rect = text1.get_rect(center=(256, 256))
+
+        else:
+            text1 = font.render(f"Hit Space to Start", True, "red")
+            text1_rect = text1.get_rect(center=(256, 256))
+
+        screen.fill("white")
+        screen.blit(text1, text1_rect)
 
     pg.display.update()
     clock.tick(60)
+    
