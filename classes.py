@@ -1,10 +1,6 @@
 import pygame as pg
 
 
-class Player:
-    pass
-
-
 class Circle(pg.sprite.Sprite):
     def __init__(self, x, y, radius):
         super().__init__()
@@ -168,32 +164,6 @@ class Game_State:
                 self.white_pieces.append(captured_piece)
             elif captured_piece.color == "black":
                 self.black_pieces.append(captured_piece)
-
-
-    def check_mate(self, turn):
-        if self.if_Check(turn):
-            if turn == "white":
-                for pieces in self.white_pieces:
-                    if pieces.get_valid_moves(self.get_pos(pieces), self, turn):
-                        return False
-            elif turn == "black":
-                for pieces in self.black_pieces:
-                    if pieces.get_valid_moves(self.get_pos(pieces), self, turn):
-                        return False
-            return True
-        return False
-    
-
-    def stale_mate(self,turn):
-        if turn == "white":
-            for pieces in self.white_pieces:
-                if pieces.get_valid_moves(self.get_pos(pieces), self, turn):
-                    return False
-        elif turn == "black":
-            for pieces in self.black_pieces:
-                if pieces.get_valid_moves(self.get_pos(pieces), self, turn):
-                    return False
-        return True
 
 
 class Piece:
@@ -498,7 +468,6 @@ class Rectangle(pg.sprite.Sprite):
                     click = (x_pos // 64, (512 - y_pos) // 64)
 
                 if click[0] == self.x:
-                    print(click[1])
                     former_piece = self.promotion_pieces[
                         list(self.promotion_pieces.keys())[click[1]]
                     ]
