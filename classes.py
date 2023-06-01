@@ -208,7 +208,7 @@ class King(Piece):
                     moves.append((x_temp, y_temp))
 
         # Castling
-        if not self.check:
+        if not self.check and pos == self.start_pos:
             if self.castling:
                 if isinstance(board[x][y + 3], Castle):
                     if board[x][y + 3].castling:

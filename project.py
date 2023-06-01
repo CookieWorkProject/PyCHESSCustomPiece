@@ -14,11 +14,6 @@ black_location = set()
 global white_location
 white_location = set()
 
-global gs
-gs = Gs()
-
-turn = "white"
-
 pawn_promotion = False
 
 former_piece = None
@@ -54,17 +49,19 @@ for row in range(8):
             square = Squares(column * 64, row * 64, "#9D5A30")
         square_group.add(square)
 
-for i, row in enumerate(gs.board):
-    for x, col in enumerate(row):
-        if col != "--":
-            if gs.board[i][x].color == "black":
-                if isinstance(gs.board[i][x], King):
-                    gs.blackKing = (i, x)
-                gs.black_pieces.append(gs.board[i][x])
-            else:
-                if isinstance(gs.board[i][x], King):
-                    gs.whiteKing = (i, x)
-                gs.white_pieces.append(gs.board[i][x])
+
+def update_atrs(gs):
+    for i, row in enumerate(gs.board):
+        for x, col in enumerate(row):
+            if col != "--":
+                if gs.board[i][x].color == "black":
+                    if isinstance(gs.board[i][x], King):
+                        gs.blackKing = (i, x)
+                    gs.black_pieces.append(gs.board[i][x])
+                else:
+                    if isinstance(gs.board[i][x], King):
+                        gs.whiteKing = (i, x)
+                    gs.white_pieces.append(gs.board[i][x])
 
 
 def draw_pieces(screen, gs):
@@ -82,7 +79,7 @@ def draw_pieces(screen, gs):
                     white_location.add((pos[1] // 64, pos[0] // 64))
 
 
-def move_piece(Player_click, gs):
+def move_piece(Player_click, gs, turn):
     global pawn_promotion
     global rectangle
     global former_piece
@@ -244,9 +241,9 @@ def staleMate(gamestate,turn):
 
 
 def main():
-    global turn
     global pawn_promotion
     global former_piece
+    global en_passant_piece
 
     flag = True
     active = False
@@ -265,8 +262,15 @@ def main():
                 if event.key == pg.K_SPACE:
                     if not active:
                         active = True
+                    gs = Gs()
+                    update_atrs(gs)
+                    turn = "white"
                     stale_mate = False
                     check_mate = False
+                    en_passant_piece = None
+                    white_location.clear()
+                    black_location.clear()
+
 
             if event.type == pg.MOUSEBUTTONDOWN:
                 y_pos, x_pos = pg.mouse.get_pos()
@@ -314,13 +318,13 @@ def main():
 
                 if len(Player_click) == 2:
                     if turn == "white" and Player_click[0] in white_location:
-                        if move_piece(Player_click, gs):
+                        if move_piece(Player_click, gs, turn):
                             white_location.remove(Player_click[0])
                             white_location.add(Player_click[1])
                             turn = "black"
 
                     elif turn == "black" and Player_click[0] in black_location:
-                        if move_piece(Player_click, gs):
+                        if move_piece(Player_click, gs, turn):
                             black_location.remove(Player_click[0])
                             black_location.add(Player_click[1])
                             turn = "white"
