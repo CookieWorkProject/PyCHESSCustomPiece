@@ -364,7 +364,7 @@ def main():
                         ):
                             square.image.fill("red")
                 elif turn == "black":
-                    gs.board[gs.whiteKing[0]][gs.whiteKing[1]].check = True
+                    gs.board[gs.blackKing[0]][gs.blackKing[1]].check = True
                     for square in square_group.sprites():
                         if (
                             square.rect.y // 64 == gs.blackKing[0]
