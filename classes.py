@@ -11,8 +11,11 @@ class Circle(pg.sprite.Sprite):
         Initialize an instance of the class.
 
         :param x: the x position of the cirle on the screen.
+        :type x: int
         :param y: the y position of the cirle on the screen.
+        :type y: int
         :param radius: the raduis of the circle.
+        :type radius: int
         """
         super().__init__()
         self.radius = radius
@@ -43,6 +46,8 @@ class Game_State:
 
         It also initializes empty lists to store white and black pieces separately, as well as variables
         to track the positions of the white and black kings.
+
+        Additionally, it has an attribute board_state that keeps track of the board configuration after each en passant move.
 
         :return: None
         """
