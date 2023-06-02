@@ -51,14 +51,14 @@ The PyCHESS project includes image files representing chess piece images and sou
 ### test_project.py
 This program tests the move_piece, checkMate and staleMate functions of project.py. It makes use of hardcorded board configuration
 
-# Known Issues
+## Known Issues
 * The UI is not user-friendly, I will like to improve on it.
 * There are lots of redundancies in the program, I didn't really map out the structure of the program at the start and I had to make so many changes as I went on, forgetting to eliminate some redundancies
 * There are some special chess rules like fifty move and threefold repitition rules which I have not yet implemented
 * I will like to implement an AI, so users can able to play vs COM
 
 
-# Contributors
+## Contributors
 If you have identified an issue or have suggestions for improvements to the program, you are welcome to contribute to the project. To contribute, please follow the steps below:
 
 * Fork the repository on GitHub.
