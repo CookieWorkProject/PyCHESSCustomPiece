@@ -1,4 +1,4 @@
-from project import move_piece, checkMate, staleMate, update_atrs
+from main import move_piece, checkMate, staleMate, update_atrs
 from classes import *
 
 
