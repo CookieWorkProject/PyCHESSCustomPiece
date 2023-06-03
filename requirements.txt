@@ -1,3 +1,0 @@
-Pip installable libraries used:
-
-Pygame
