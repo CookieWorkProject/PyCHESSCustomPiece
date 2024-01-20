@@ -20,7 +20,7 @@ It provides an immersive experience with chess.com-inspired sound effects and an
 ## Gameplay
 <p align="center">
   <a href="https://i.imgur.com/FR9qoXe.gif">
-    <img src="https://i.imgur.com/FR9qoXe.gif" alt="Preview" width="30%"/>
+    <img src="https://i.imgur.com/FR9qoXe.gif" alt="Preview" width="40%"/>
   </a>
 </p>
 
