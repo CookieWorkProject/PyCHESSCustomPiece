@@ -19,7 +19,7 @@
   </a>
 </p>
 
-### Castling Scenario
+### Check Scenario
 <p align="center">
   <a href="https://i.imgur.com/BNd6gPV.gif">
     <img src="https://i.imgur.com/BNd6gPV.gif" alt="Preview" width="40%"/>
