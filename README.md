@@ -54,6 +54,6 @@ To run the PyCHESS game, follow these steps:
 </h3>
 
 <p align="center">
-<a href="https://github.com/joolaoye/PyCHESS/blob/main/LICENSE"><img  alt="HTML" width="50px" style="padding-right:10px;" src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/python/python-original-wordmark.svg" /></a> &nbsp; 
+<a href="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/python/python-original-wordmark.svg"><img  alt="Python" width="50px" style="padding-right:10px;" src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/python/python-original-wordmark.svg" /></a> &nbsp; 
 </p>
 <br><br>
