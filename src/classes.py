@@ -489,19 +489,32 @@ class Queen(Piece):
             (-1, -1),
         ]
         moves = []
-
+        #find the king
+        kingX = 0
+        kingY = 0
+        kingF = False#kingfound 
+        
+        for a in board:
+            for b in a:
+                
+                if isinstance(b, King):
+                    
+                    if b.color == self.color:
+                        kingF = True
+                if kingF == False:
+                    kingY+=1
+            if kingF == False:
+                kingX+=1
+                kingY = 0
+        
+        
         for dx, dy in directions:
-            x_temp, y_temp = x + dx, y + dy
-            while 0 <= x_temp < len(board) and 0 <= y_temp < len(board[x_temp]):
-                if board[x_temp][y_temp] != "--":
-                    if board[x_temp][y_temp].color == self.color:
-                        break
-                    else:
-                        moves.append((x_temp, y_temp))
-                        break
-                moves.append((x_temp, y_temp))
-                x_temp += dx
-                y_temp += dy
+            x_temp, y_temp = kingX + dx, kingY + dy
+            if 0 <= x_temp < len(board) and 0 <= y_temp < len(board[x_temp]):
+                if board[x_temp][y_temp] == "--":
+                    moves.append((x_temp, y_temp))
+                elif board[x_temp][y_temp].color != self.color:
+                    moves.append((x_temp, y_temp))
 
         return moves
 
@@ -550,21 +563,17 @@ class Castle(Piece):
         :rtype: List
         """
         x, y = pos
-        directions = [(1, 0), (-1, 0), (0, 1), (0, -1)]
+        directions = [(2, 0), (-2, 0), (0, 2), (0, -2)]
         moves = []
 
         for dx, dy in directions:
             x_temp, y_temp = x + dx, y + dy
-            while 0 <= x_temp < len(board) and 0 <= y_temp < len(board[x_temp]):
+            if x_temp<8 and y_temp<8:
                 if board[x_temp][y_temp] != "--":
                     if board[x_temp][y_temp].color == self.color:
-                        break
-                    else:
-                        moves.append((x_temp, y_temp))
-                        break
+                        continue
+                    
                 moves.append((x_temp, y_temp))
-                x_temp += dx
-                y_temp += dy
 
         return moves
 
@@ -608,21 +617,18 @@ class Bishop(Piece):
         :rtype: List
         """
         x, y = pos
-        directions = [(1, 1), (-1, 1), (1, -1), (-1, -1)]
+        directions = [(2, 2), (-2, 2), (2, -2), (-2, -2)]
         moves = []
 
         for dx, dy in directions:
             x_temp, y_temp = x + dx, y + dy
-            while 0 <= x_temp < len(board) and 0 <= y_temp < len(board[x_temp]):
+            if x_temp<8 and y_temp<8:
                 if board[x_temp][y_temp] != "--":
                     if board[x_temp][y_temp].color == self.color:
-                        break
-                    else:
-                        moves.append((x_temp, y_temp))
-                        break
+                        continue
+                    
                 moves.append((x_temp, y_temp))
-                x_temp += dx
-                y_temp += dy
+            
 
         return moves
 
